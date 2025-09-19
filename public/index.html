@@ -3,44 +3,810 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Therapy</title>
+    <title>AI Astro Therapist - Your Personal Vedic Astrology Guide</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; margin: 2rem; }
-        .chat-container { max-width: 600px; margin: auto; border: 1px solid #ccc; padding: 1rem; border-radius: 8px; }
-        #messages { height: 300px; overflow-y: scroll; border-bottom: 1px solid #ccc; margin-bottom: 1rem; padding: 0.5rem; }
-        .city-result-item { padding: 8px; cursor: pointer; border-bottom: 1px solid #eee; }
-        .city-result-item:hover { background-color: #f0f0f0; }
-        #chat-form { display: flex; }
-        #user-input { flex-grow: 1; padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc; }
-        button { padding: 0.5rem 1rem; margin-left: 0.5rem; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        label { display: block; margin-top: 1rem; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2c1810;
+            --secondary-color: #8b4513;
+            --accent-color: #daa520;
+            --background-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            --card-background: rgba(255, 255, 255, 0.95);
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-light: #999;
+            --border-color: #e0e0e0;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background elements */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="star" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:gold;stop-opacity:0.8"/><stop offset="100%" style="stop-color:gold;stop-opacity:0"/></radialGradient></defs><circle cx="100" cy="100" r="2" fill="url(%23star)"/><circle cx="300" cy="200" r="1.5" fill="url(%23star)"/><circle cx="500" cy="150" r="1" fill="url(%23star)"/><circle cx="700" cy="300" r="2" fill="url(%23star)"/><circle cx="200" cy="400" r="1" fill="url(%23star)"/><circle cx="800" cy="200" r="1.5" fill="url(%23star)"/><circle cx="150" cy="600" r="1" fill="url(%23star)"/><circle cx="900" cy="500" r="2" fill="url(%23star)"/><circle cx="400" cy="700" r="1.5" fill="url(%23star)"/><circle cx="600" cy="800" r="1" fill="url(%23star)"/></svg>') repeat;
+            opacity: 0.3;
+            animation: twinkle 4s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.7; }
+        }
+
+        .container {
+            background: var(--card-background);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 40px;
+            width: 100%;
+            max-width: 800px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .zodiac-symbols {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .zodiac-symbol {
+            font-size: 1.5rem;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .zodiac-symbol:hover {
+            opacity: 1;
+            transform: scale(1.2) rotate(15deg);
+            color: var(--accent-color);
+        }
+
+        .form-container {
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .form-group label i {
+            margin-right: 8px;
+            color: var(--accent-color);
+            width: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .city-search-container {
+            position: relative;
+        }
+
+        .city-results-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .city-result-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+        }
+
+        .city-result-item:hover {
+            background-color: #f8f9fa !important;
+            color: var(--primary-color);
+        }
+
+        .city-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(139, 69, 19, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chat-container {
+            display: none;
+            flex-direction: column;
+            height: 500px;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(248, 249, 250, 0.5);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            scroll-behavior: smooth;
+        }
+
+        .messages-container p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            padding: 15px;
+            border-radius: 10px;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .messages-container p strong {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .messages-container p:nth-child(even) {
+            background: rgba(218, 165, 32, 0.1);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .messages-container p:nth-child(odd) {
+            background: rgba(139, 69, 19, 0.1);
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            font-size: 1rem;
+            resize: none;
+            max-height: 120px;
+            min-height: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1);
+        }
+
+        .send-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        .loading-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .loading-dots span {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .error-message {
+            color: #d32f2f;
+            background: rgba(211, 47, 47, 0.1);
+            border-left: 4px solid #d32f2f;
+        }
+
+        .success-message {
+            color: #2e7d32;
+            background: rgba(46, 125, 50, 0.1);
+            border-left: 4px solid #2e7d32;
+        }
+
+        /* Scrollbar styling */
+        .messages-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .zodiac-symbols {
+                gap: 10px;
+            }
+
+            .zodiac-symbol {
+                font-size: 1.2rem;
+            }
+
+            .chat-container {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .input-field {
+                padding: 12px 15px;
+            }
+
+            .btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <h2>AI Astrologer</h2>
-        <div id="messages"></div>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-star"></i> AI Astro Therapist</h1>
+            <p class="subtitle">Your Personal Vedic Astrology Guide & Spiritual Counselor</p>
+            <div class="zodiac-symbols">
+                <span class="zodiac-symbol">♈</span>
+                <span class="zodiac-symbol">♉</span>
+                <span class="zodiac-symbol">♊</span>
+                <span class="zodiac-symbol">♋</span>
+                <span class="zodiac-symbol">♌</span>
+                <span class="zodiac-symbol">♍</span>
+                <span class="zodiac-symbol">♎</span>
+                <span class="zodiac-symbol">♏</span>
+                <span class="zodiac-symbol">♐</span>
+                <span class="zodiac-symbol">♑</span>
+                <span class="zodiac-symbol">♒</span>
+                <span class="zodiac-symbol">♓</span>
+            </div>
+        </div>
 
-        <form id="details-form">
-            <h3>Enter Your Birth Details:</h3>
-            <label for="dob">Date of Birth:</label>
-            <input type="date" id="dob-input" required>
-            
-            <label for="tob">Time of Birth:</label>
-            <input type="time" id="tob-input" required>
-            
-            <label for="city">City of Birth:</label>
-            <input type="text" id="city-input" placeholder="e.g., New York" required>
-            <div id="city-results-dropdown"></div>
+        <!-- Birth Details Form -->
+        <form id="details-form" class="form-container">
+            <div class="form-group">
+                <div class="form-row">
+                    <div>
+                        <label for="dob-input">
+                            <i class="fas fa-calendar-alt"></i>Date of Birth
+                        </label>
+                        <input type="date" id="dob-input" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="tob-input">
+                            <i class="fas fa-clock"></i>Time of Birth
+                        </label>
+                        <input type="time" id="tob-input" class="input-field" required>
+                    </div>
+                </div>
+            </div>
 
-            <button type="submit">Submit Details</button>
+            <div class="form-group">
+                <label for="city-input">
+                    <i class="fas fa-map-marker-alt"></i>Birth City
+                </label>
+                <div class="city-search-container">
+                    <input 
+                        type="text" 
+                        id="city-input" 
+                        class="input-field" 
+                        placeholder="Start typing your birth city..."
+                        autocomplete="off"
+                        required
+                    >
+                    <div id="city-results-dropdown" class="city-results-dropdown"></div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">
+                <i class="fas fa-star"></i> Generate My Astrological Profile
+            </button>
         </form>
 
-        <form id="chat-form" style="display: none;">
-            <input type="text" id="user-input" placeholder="Ask your question here...">
-            <button type="submit">Send</button>
-        </form>
+        <!-- Chat Interface -->
+        <div id="chat-container" class="chat-container">
+            <div id="messages" class="messages-container">
+                <p><em><i class="fas fa-info-circle"></i> Please enter your birth details above to begin your personalized astrological consultation.</em></p>
+            </div>
+
+            <form id="chat-form" class="chat-input-container">
+                <textarea 
+                    id="user-input" 
+                    class="chat-input" 
+                    placeholder="Ask me about your personality, relationships, career, spiritual path, or any aspect of your life..."
+                    rows="1"
+                ></textarea>
+                <button type="submit" class="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
     </div>
-    <script src="app.js"></script>
+
+    <script>
+        const detailsForm = document.getElementById('details-form');
+        const chatForm = document.getElementById('chat-form');
+        const chatContainer = document.getElementById('chat-container');
+        const messagesContainer = document.getElementById('messages');
+        const userInput = document.getElementById('user-input');
+        const cityInput = document.getElementById('city-input');
+        const cityResultsDropdown = document.getElementById('city-results-dropdown');
+
+        let userBirthDetails = {};
+        let isProcessing = false;
+
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Auto-scroll messages to bottom
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Add loading indicator
+        function showLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading-indicator';
+            loadingDiv.className = 'loading-indicator';
+            loadingDiv.innerHTML = `
+                <p><strong>AI Astrologer:</strong> 
+                    <span style="display: flex; align-items: center; gap: 10px;">
+                        <em>Analyzing your cosmic blueprint</em>
+                        <div class="loading-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </span>
+                </p>
+            `;
+            messagesContainer.appendChild(loadingDiv);
+            scrollToBottom();
+        }
+
+        function hideLoading() {
+            const loadingDiv = document.getElementById('loading-indicator');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+
+        // Handle the live city search dropdown
+        cityInput.addEventListener('keyup', async (e) => {
+            const query = e.target.value.trim();
+            
+            // Clear previous results
+            cityResultsDropdown.innerHTML = '';
+            
+            if (query.length < 3) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://${window.location.hostname}:3000/search-city?q=${encodeURIComponent(query)}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const cities = await response.json();
+                
+                if (cities.length > 0) {
+                    cities.forEach(city => {
+                        const cityItem = document.createElement('div');
+                        cityItem.textContent = city.formatted;
+                        cityItem.classList.add('city-result-item');
+                        
+                        cityItem.addEventListener('click', () => {
+                            cityInput.value = city.formatted;
+                            cityInput.dataset.lat = city.lat;
+                            cityInput.dataset.lon = city.lon;
+                            cityResultsDropdown.innerHTML = '';
+                        });
+                        
+                        cityResultsDropdown.appendChild(cityItem);
+                    });
+                } else {
+                    const noResults = document.createElement('div');
+                    noResults.textContent = 'No cities found';
+                    noResults.style.padding = '15px 20px';
+                    noResults.style.color = '#999';
+                    noResults.style.textAlign = 'center';
+                    cityResultsDropdown.appendChild(noResults);
+                }
+            } catch (error) {
+                console.error('Failed to fetch cities:', error);
+                const errorDiv = document.createElement('div');
+                errorDiv.textContent = 'Error searching cities';
+                errorDiv.style.padding = '15px 20px';
+                errorDiv.style.color = '#d32f2f';
+                errorDiv.style.textAlign = 'center';
+                cityResultsDropdown.appendChild(errorDiv);
+            }
+        });
+
+        // Clear dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!cityInput.contains(e.target) && !cityResultsDropdown.contains(e.target)) {
+                cityResultsDropdown.innerHTML = '';
+            }
+        });
+
+        // Validate form inputs
+        function validateFormInputs() {
+            const dob = document.getElementById('dob-input').value;
+            const tob = document.getElementById('tob-input').value;
+            const city = cityInput.value.trim();
+            const lat = cityInput.dataset.lat;
+            const lon = cityInput.dataset.lon;
+
+            if (!dob) {
+                return { valid: false, error: 'Please enter your date of birth.' };
+            }
+            
+            if (!tob) {
+                return { valid: false, error: 'Please enter your time of birth.' };
+            }
+            
+            if (!city) {
+                return { valid: false, error: 'Please enter your birth city.' };
+            }
+            
+            if (!lat || !lon) {
+                return { valid: false, error: 'Please select a city from the dropdown list.' };
+            }
+
+            return { valid: true };
+        }
+
+        // Handle the initial form submission with birth details
+        detailsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (isProcessing) return;
+            
+            const validation = validateFormInputs();
+            if (!validation.valid) {
+                messagesContainer.innerHTML = `<p class="error-message"><strong><i class="fas fa-exclamation-triangle"></i> Error:</strong> ${validation.error}</p>`;
+                return;
+            }
+
+            isProcessing = true;
+            const submitButton = detailsForm.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Your Chart...';
+            submitButton.disabled = true;
+
+            try {
+                const dob = document.getElementById('dob-input').value;
+                const tob = document.getElementById('tob-input').value;
+                const lat = parseFloat(cityInput.dataset.lat);
+                const lon = parseFloat(cityInput.dataset.lon);
+
+                userBirthDetails = {
+                    date: dob,
+                    time: tob,
+                    location: { lat, lon }
+                };
+
+                // Show processing message
+                messagesContainer.innerHTML = '<p class="loading-indicator"><strong>AI Astrologer:</strong> <em><i class="fas fa-magic"></i> Calculating your planetary positions and generating your cosmic profile...</em></p>';
+
+                // Initial analysis message
+                const tempMessage = "Please provide an overview of my astrological profile including my sun, moon, and rising signs, and what this means for my personality and life path.";
+                const response = await sendChatRequest(tempMessage, userBirthDetails);
+
+                if (response && response.response) {
+                    // Success - show the chat interface
+                    messagesContainer.innerHTML = `<p class="success-message"><strong>AI Astrologer:</strong> ${response.response}</p>`;
+                    detailsForm.style.display = 'none';
+                    chatContainer.style.display = 'flex';
+                    
+                    // Add a welcome message
+                    setTimeout(() => {
+                        messagesContainer.innerHTML += `<p style="text-align: center; font-style: italic; color: var(--text-secondary); border: 2px dashed var(--accent-color); background: rgba(218, 165, 32, 0.05);"><i class="fas fa-comments"></i> <strong>Your cosmic consultation is now active!</strong><br>Ask me about relationships, career, spiritual growth, personality insights, compatibility, life challenges, or any guidance you seek from the stars. I'm here to help illuminate your path.</p>`;
+                        scrollToBottom();
+                    }, 1000);
+                    
+                } else {
+                    throw new Error('Failed to process birth details');
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                messagesContainer.innerHTML = `<p class="error-message"><strong><i class="fas fa-exclamation-triangle"></i> Error:</strong> Failed to process your birth details. Please check your inputs and try again. ${error.message ? `(${error.message})` : ''}</p>`;
+            } finally {
+                isProcessing = false;
+                submitButton.innerHTML = originalButtonText;
+                submitButton.disabled = false;
+            }
+        });
+
+        // Handle the chat message submission
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const userMessage = userInput.value.trim();
+            if (userMessage === '' || isProcessing) return;
+
+            isProcessing = true;
+            
+            // Add user message
+            messagesContainer.innerHTML += `<p><strong><i class="fas fa-user"></i> You:</strong> ${userMessage}</p>`;
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            scrollToBottom();
+
+            // Show loading indicator
+            showLoading();
+
+            try {
+                const response = await sendChatRequest(userMessage, userBirthDetails);
+
+                hideLoading();
+
+                if (response && response.response) {
+                    messagesContainer.innerHTML += `<p><strong><i class="fas fa-star"></i> AI Astrologer:</strong> ${response.response}</p>`;
+                } else {
+                    messagesContainer.innerHTML += `<p class="error-message"><strong><i class="fas fa-exclamation-triangle"></i> Error:</strong> Could not get a response from the AI. Please try again.</p>`;
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Chat error:', error);
+                messagesContainer.innerHTML += `<p class="error-message"><strong><i class="fas fa-exclamation-triangle"></i> Error:</strong> Failed to send message. Please try again.</p>`;
+            } finally {
+                isProcessing = false;
+                scrollToBottom();
+            }
+        });
+
+        // Allow Enter key to submit (but Shift+Enter for new line)
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Unified function to send the request to the back-end
+        async function sendChatRequest(message, birthDetails) {
+            try {
+                const response = await fetch(`http://${window.location.hostname}:3000/chat`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        birthDetails: birthDetails
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Request error:', error);
+                throw error;
+            }
+        }
+
+        // Initialize - check if we need to show chat form (for page refreshes)
+        document.addEventListener('DOMContentLoaded', () => {
+            // Reset form state on page load
+            if (detailsForm) detailsForm.style.display = 'block';
+            if (chatContainer) chatContainer.style.display = 'none';
+            if (messagesContainer) messagesContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);"><em><i class="fas fa-info-circle"></i> Welcome to your personal astrological consultation. Please enter your birth details above to unlock the wisdom of your stars.</em></p>';
+        });
+    </script>
 </body>
 </html>
