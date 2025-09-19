@@ -22,6 +22,27 @@ if (!ASTROLOGY_CLIENT_ID || !ASTROLOGY_CLIENT_SECRET || !GEMINI_API_KEY || !OPEN
 let accessToken = null;
 let tokenExpiry = 0;
 
+// Session storage for conversation history
+const sessions = new Map();
+
+// Generate a simple session ID
+function generateSessionId() {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
+
+// Clean up old sessions (older than 24 hours)
+function cleanupOldSessions() {
+  const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+  for (const [sessionId, session] of sessions.entries()) {
+    if (session.createdAt < oneDayAgo) {
+      sessions.delete(sessionId);
+    }
+  }
+}
+
+// Run cleanup every hour
+setInterval(cleanupOldSessions, 60 * 60 * 1000);
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public')); // Serve static files from public directory
@@ -100,6 +121,7 @@ async function getTimezoneFromCoords(lat, lon) {
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
   const userBirthDetails = req.body.birthDetails;
+  let sessionId = req.body.sessionId;
 
   if (!userBirthDetails || !userBirthDetails.location) {
     return res.status(400).json({
@@ -111,68 +133,106 @@ app.post('/chat', async (req, res) => {
     const lat = userBirthDetails.location.lat;
     const lon = userBirthDetails.location.lon;
 
-    // Get the appropriate timezone for the birth location
-    const timezone = await getTimezoneFromCoords(lat, lon);
-    
-    // Create a more precise datetime string
-    const birthDateTime = moment.tz(
-      `${userBirthDetails.date} ${userBirthDetails.time}`,
-      'YYYY-MM-DD HH:mm',
-      timezone
-    );
+    // Generate session ID if not provided (first message)
+    if (!sessionId) {
+      sessionId = generateSessionId();
+    }
 
-    // Format for Prokerala API (they expect UTC or specific format)
-    const formattedDateTime = birthDateTime.utc().format('YYYY-MM-DDTHH:mm:ss[Z]');
-    
-    console.log('Original date/time:', userBirthDetails.date, userBirthDetails.time);
-    console.log('Detected timezone:', timezone);
-    console.log('Formatted DateTime for API:', formattedDateTime);
+    // Check if this is a new session or if we need to get astrology data
+    let session = sessions.get(sessionId);
+    let birthData;
 
-    const token = await getProkeralaAccessToken();
+    if (!session) {
+      // New session - get astrology data and set up initial context
+      const timezone = await getTimezoneFromCoords(lat, lon);
+      
+      const birthDateTime = moment.tz(
+        `${userBirthDetails.date} ${userBirthDetails.time}`,
+        'YYYY-MM-DD HH:mm',
+        timezone
+      );
 
-    // Get astrology data from Prokerala
-    const astrologyResponse = await axios.get(
-      'https://api.prokerala.com/v2/astrology/birth-details',
-      {
-        params: {
-          ayanamsa: 1,
-          datetime: formattedDateTime,
-          coordinates: `${lat},${lon}`
-        },
-        headers: {
-          Authorization: `Bearer ${token}`
+      const formattedDateTime = birthDateTime.utc().format('YYYY-MM-DDTHH:mm:ss[Z]');
+      
+      console.log('New session - fetching astrology data...');
+      console.log('Formatted DateTime for API:', formattedDateTime);
+
+      const token = await getProkeralaAccessToken();
+
+      // Get astrology data from Prokerala
+      const astrologyResponse = await axios.get(
+        'https://api.prokerala.com/v2/astrology/birth-details',
+        {
+          params: {
+            ayanamsa: 1,
+            datetime: formattedDateTime,
+            coordinates: `${lat},${lon}`
+          },
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
-      }
-    );
+      );
 
-    const birthData = astrologyResponse.data;
-    console.log('Birth Data received:', JSON.stringify(birthData, null, 2));
+      birthData = astrologyResponse.data;
+      console.log('Birth Data received for new session');
 
-    // Enhanced Gemini prompt with better structure
-    const aiPrompt = `You are a compassionate AI Vedic astrologer and therapist. Your role is to provide insightful, supportive guidance based on Vedic astrology principles.
+      // Create new session with initial system message
+      const systemPrompt = `You are a compassionate AI Vedic astrologer and therapist. Your role is to provide insightful, supportive guidance based on Vedic astrology principles.
 
 User's Birth Information:
 ${JSON.stringify(birthData, null, 2)}
 
-User's Question: "${userMessage}"
+Please provide thoughtful responses that:
+1. Address their specific questions to help them open up more about their problems
+2. Use the astrological data to provide insights into their traits
+3. Maintain a warm, supportive tone which helps them build trust 
+4. Offer practical guidance where appropriate
+5. Keep responses focused with short paragraphs
+6. Remember this birth data for the entire conversation
+7. Use emojis and light humor occasionally to add warmth: ✨🌟💫🌙☀️
+8. Do not overwhelm the user with very long answers
+9. make them feel they are talking to a trusted, compassionate person
+10. Use line breaks appropriately 
 
-Please provide a thoughtful response that:
-1. Addresses their specific question
-2. Uses the astrological data to provide insights
-3. Maintains a warm, supportive tone
-4. Offers practical guidance where appropriate
-5. Keeps the response focused and not overly technical
 
-Response:`;
+This is the start of a conversation with this person. You have their complete birth chart data above.`;
 
-    // Call Gemini API with better error handling
+      session = {
+        sessionId: sessionId,
+        birthDetails: userBirthDetails,
+        birthData: birthData,
+        conversationHistory: [
+          {
+            role: "user",
+            parts: [{ text: systemPrompt }]
+          },
+          {
+            role: "model", 
+            parts: [{ text: "I understand. I have analyzed your birth chart and I am ready to provide personalized astrological guidance based on your Vedic astrology data. I will maintain this context throughout our conversation. What would you like to know?" }]
+          }
+        ],
+        createdAt: Date.now()
+      };
+
+      sessions.set(sessionId, session);
+    } else {
+      // Existing session - use cached birth data
+      birthData = session.birthData;
+      console.log('Using existing session data');
+    }
+
+    // Add user message to conversation history
+    session.conversationHistory.push({
+      role: "user",
+      parts: [{ text: userMessage }]
+    });
+
+    // Call Gemini API with conversation history
     const aiResponse = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
-        contents: [{
-          role: "user",
-          parts: [{ text: aiPrompt }]
-        }],
+        contents: session.conversationHistory,
         generationConfig: {
           temperature: 0.7,
           topK: 40,
@@ -184,7 +244,7 @@ Response:`;
         headers: {
           "Content-Type": "application/json"
         },
-        timeout: 30000 // 30 second timeout
+        timeout: 30000
       }
     );
 
@@ -192,7 +252,25 @@ Response:`;
       aiResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
       "I apologize, but I'm having trouble generating a response right now. Please try rephrasing your question.";
 
-    res.json({ response: finalResponse });
+    // Add AI response to conversation history
+    session.conversationHistory.push({
+      role: "model",
+      parts: [{ text: finalResponse }]
+    });
+
+    // Limit conversation history to prevent token overflow (keep last 20 messages)
+    if (session.conversationHistory.length > 22) { // Keep system message + last 20
+      session.conversationHistory = [
+        session.conversationHistory[0], // Keep system message
+        session.conversationHistory[1], // Keep initial model response
+        ...session.conversationHistory.slice(-20) // Keep last 20 messages
+      ];
+    }
+
+    res.json({ 
+      response: finalResponse, 
+      sessionId: sessionId 
+    });
 
   } catch (error) {
     console.error('API Error Details:', {
@@ -211,7 +289,10 @@ Response:`;
       errorMessage = "The request timed out. Please try again with a shorter question.";
     }
 
-    res.status(500).json({ response: errorMessage });
+    res.status(500).json({ 
+      response: errorMessage,
+      sessionId: req.body.sessionId 
+    });
   }
 });
 

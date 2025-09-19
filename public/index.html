@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Astro Therapist - Your Personal Vedic Astrology Guide</title>
+    <title>AstroWise Therapy - Personalized Astrological Guidance with AI-powered Emotional Support</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -447,8 +447,9 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-star"></i> AI Astro Therapist</h1>
-            <p class="subtitle">Your Personal Vedic Astrology Guide & Spiritual Counselor</p>
+            <h1><i class="fas fa-star"></i> AstroWise Therapy </h1>
+            <p class="subtitle">Personalized Astrological Guidance with AI-powered Emotional Support</p>
+           
             <div class="zodiac-symbols">
                 <span class="zodiac-symbol">♈</span>
                 <span class="zodiac-symbol">♉</span>
@@ -505,6 +506,10 @@
                 <i class="fas fa-star"></i> Generate My Astrological Profile
             </button>
         </form>
+        <div class="disclaimer-box">
+            <p><i class="fas fa-info-circle"></i> <strong> This service provides insights for personal reflection & is not a substitute for professional medical, psychological, or psychiatric care. Please consult qualified healthcare providers for medical concerns.</strong></p>
+        </div>
+
 
         <!-- Chat Interface -->
         <div id="chat-container" class="chat-container">
@@ -537,6 +542,7 @@
 
         let userBirthDetails = {};
         let isProcessing = false;
+        let sessionId = null; // Track session for conversation continuity
 
         // Auto-resize textarea
         userInput.addEventListener('input', function() {
@@ -703,6 +709,9 @@
                 const response = await sendChatRequest(tempMessage, userBirthDetails);
 
                 if (response && response.response) {
+                    // Store session ID for future requests
+                    sessionId = response.sessionId;
+                    
                     // Success - show the chat interface
                     messagesContainer.innerHTML = `<p class="success-message"><strong>AI Astrologer:</strong> ${response.response}</p>`;
                     detailsForm.style.display = 'none';
@@ -776,16 +785,23 @@
         // Unified function to send the request to the back-end
         async function sendChatRequest(message, birthDetails) {
             try {
+                const requestBody = {
+                    message: message,
+                    birthDetails: birthDetails
+                };
+
+                // Include session ID if we have one (for continuing conversations)
+                if (sessionId) {
+                    requestBody.sessionId = sessionId;
+                }
+
                 const response = await fetch(`http://${window.location.hostname}:3000/chat`, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({
-                        message: message,
-                        birthDetails: birthDetails
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 if (!response.ok) {
@@ -793,6 +809,12 @@
                 }
 
                 const data = await response.json();
+                
+                // Store session ID if this is the first message
+                if (data.sessionId && !sessionId) {
+                    sessionId = data.sessionId;
+                }
+                
                 return data;
             } catch (error) {
                 console.error('Request error:', error);
@@ -803,6 +825,7 @@
         // Initialize - check if we need to show chat form (for page refreshes)
         document.addEventListener('DOMContentLoaded', () => {
             // Reset form state on page load
+            sessionId = null; // Reset session on page refresh
             if (detailsForm) detailsForm.style.display = 'block';
             if (chatContainer) chatContainer.style.display = 'none';
             if (messagesContainer) messagesContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);"><em><i class="fas fa-info-circle"></i> Welcome to your personal astrological consultation. Please enter your birth details above to unlock the wisdom of your stars.</em></p>';
