@@ -595,7 +595,12 @@
             }
 
             try {
-                const response = await fetch(`http://${window.location.hostname}:3000/search-city?q=${encodeURIComponent(query)}`);
+                // Fix URL for production deployment
+                const baseURL = window.location.hostname === 'localhost' 
+                    ? `http://${window.location.hostname}:3000`
+                    : `https://${window.location.host}`;
+                
+                const response = await fetch(`${baseURL}/search-city?q=${encodeURIComponent(query)}`);
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
