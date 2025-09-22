@@ -82,7 +82,6 @@ app.get('/search-city', async (req, res) => {
         'q': query,
         'key': OPENCAGE_API_KEY,
         'limit': 5,
-        'countrycode': 'us'
       }
     });
 
