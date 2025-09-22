@@ -1,4 +1,4 @@
-// Load environment variables from the .env file only in development
+// Only load dotenv in development/local environment
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
@@ -7,18 +7,49 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const moment = require('moment-timezone');
+const path = require('path');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-// API Keys
+// Add comprehensive logging
+console.log('=== RAILWAY DEPLOYMENT DEBUG ===');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('Current working directory:', process.cwd());
+console.log('Environment variables present:', Object.keys(process.env).length);
+
+// Log all environment variables (be careful with sensitive data)
+console.log('All env vars starting with ASTROLOGY:', 
+  Object.keys(process.env).filter(key => key.startsWith('ASTROLOGY')));
+console.log('All env vars starting with GEMINI:', 
+  Object.keys(process.env).filter(key => key.startsWith('GEMINI')));
+console.log('All env vars starting with OPENCAGE:', 
+  Object.keys(process.env).filter(key => key.startsWith('OPENCAGE')));
+
+// API Keys - Railway will inject these automatically
 const ASTROLOGY_CLIENT_ID = process.env.ASTROLOGY_CLIENT_ID;
 const ASTROLOGY_CLIENT_SECRET = process.env.ASTROLOGY_CLIENT_SECRET;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const OPENCAGE_API_KEY = process.env.OPENCAGE_API_KEY;
 
+// Add debug logging to see what's actually loaded
+console.log('=== API KEY STATUS ===');
+console.log('ASTROLOGY_CLIENT_ID:', ASTROLOGY_CLIENT_ID ? `SET (${ASTROLOGY_CLIENT_ID.substring(0, 5)}...)` : 'MISSING');
+console.log('ASTROLOGY_CLIENT_SECRET:', ASTROLOGY_CLIENT_SECRET ? `SET (${ASTROLOGY_CLIENT_SECRET.substring(0, 5)}...)` : 'MISSING');
+console.log('GEMINI_API_KEY:', GEMINI_API_KEY ? `SET (${GEMINI_API_KEY.substring(0, 5)}...)` : 'MISSING');
+console.log('OPENCAGE_API_KEY:', OPENCAGE_API_KEY ? `SET (${OPENCAGE_API_KEY.substring(0, 5)}...)` : 'MISSING');
+
 if (!ASTROLOGY_CLIENT_ID || !ASTROLOGY_CLIENT_SECRET || !GEMINI_API_KEY || !OPENCAGE_API_KEY) {
-  console.error("Error: Missing one or more API keys. Please check your .env file.");
+  console.error("=== ERROR: MISSING API KEYS ===");
+  console.error("Missing variables in Railway:");
+  if (!ASTROLOGY_CLIENT_ID) console.error("❌ ASTROLOGY_CLIENT_ID");
+  if (!ASTROLOGY_CLIENT_SECRET) console.error("❌ ASTROLOGY_CLIENT_SECRET");
+  if (!GEMINI_API_KEY) console.error("❌ GEMINI_API_KEY");
+  if (!OPENCAGE_API_KEY) console.error("❌ OPENCAGE_API_KEY");
+  console.error("Please check Railway dashboard Variables section");
   process.exit(1);
+} else {
+  console.log("✅ All API keys are present!");
 }
 
 let accessToken = null;
@@ -47,6 +78,18 @@ setInterval(cleanupOldSessions, 60 * 60 * 1000);
 
 app.use(cors());
 app.use(express.json());
+// Serve static files with environment-aware configuration
+app.get('/', (req, res) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiBaseUrl = isProduction 
+    ? `https://${req.get('host')}` 
+    : 'http://localhost:3000';
+  
+  // You could inject this into your HTML template here
+  // For now, the client-side detection should work
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.use(express.static('public')); // Serve static files from public directory
 
 // --- Prokerala Token Management ---
@@ -82,6 +125,7 @@ app.get('/search-city', async (req, res) => {
         'q': query,
         'key': OPENCAGE_API_KEY,
         'limit': 5,
+        'countrycode': 'us'
       }
     });
 
@@ -179,25 +223,30 @@ app.post('/chat', async (req, res) => {
       console.log('Birth Data received for new session');
 
       // Create new session with initial system message
-      const systemPrompt = `You are a compassionate AI Vedic astrologer and therapist. Your role is to provide insightful, supportive guidance based on Vedic astrology principles.
+      const systemPrompt = `You are a compassionate AI Vedic astrologer and therapist named "Cosmic Counselor". Your role is to provide insightful, supportive guidance based on Vedic astrology principles.
 
 User's Birth Information:
 ${JSON.stringify(birthData, null, 2)}
 
-Please provide thoughtful responses that:
-1. Address their specific questions to help them open up more about their problems
-2. Use the astrological data to provide insights into their traits
-3. Maintain a warm, supportive tone which helps them build trust 
-4. Offer practical guidance where appropriate
-5. Keep responses focused with short paragraphs
-6. Remember this birth data for the entire conversation
-7. Use emojis and light humor occasionally to add warmth: ✨🌟💫🌙☀️
-8. Do not overwhelm the user with very long answers
-9. make them feel they are talking to a trusted, compassionate person
-10. Use line breaks appropriately 
+RESPONSE FORMATTING GUIDELINES:
+- Use clear paragraphs with line breaks between different topics
+- Start responses with a warm, personalized greeting when appropriate
+- Use small paragraphs
+- Avoid overwhelming technical jargon - explain astrological terms simply
+- End with encouraging, actionable advice
+- Keep responses between 150-300 words unless specifically asked for more detail
+- Use emojis occasionally (1-2 per response) to add warmth: ✨🌟💫🌙☀️
 
+TONE AND APPROACH:
+- Warm, empathetic, and supportive
+- Wise but accessible - like a trusted friend with deep knowledge
+- Focus on empowerment and personal growth
+- Balance mystical wisdom with practical guidance
+- Address their specific questions directly
+- Reference their astrological placements naturally in conversation
+- Avoid generic horoscope-style language
 
-This is the start of a conversation with this person. You have their complete birth chart data above.`;
+Remember this birth data for the entire conversation. Provide personalized insights based on their unique chart.`;
 
       session = {
         sessionId: sessionId,
@@ -210,7 +259,7 @@ This is the start of a conversation with this person. You have their complete bi
           },
           {
             role: "model", 
-            parts: [{ text: "I understand. I have analyzed your birth chart and I am ready to provide personalized astrological guidance based on your Vedic astrology data. I will maintain this context throughout our conversation. What would you like to know?" }]
+            parts: [{ text: "✨ Thank you for sharing your birth details with me. I've carefully analyzed your unique astrological chart and I'm here to provide personalized guidance based on your cosmic blueprint.\n\nI can see the beautiful complexity of your planetary alignments and I'm ready to help you understand how they influence your personality, relationships, career path, and spiritual journey.\n\nWhat aspect of your life would you like to explore first? I'm here to offer insights that are both meaningful and practical for your personal growth. 🌟" }]
           }
         ],
         createdAt: Date.now()
