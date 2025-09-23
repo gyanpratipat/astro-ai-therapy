@@ -3,11 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
     <title>AI Astro Therapist - Your Personal Vedic Astrology Guide</title>
-=======
-    <title>AstroWise Therapy -Personalized Astrological Guidance with AI-powered Emotional Support</title>
->>>>>>> fdbfe87de5af457ffaadd9e6fe4b498c32ffac71
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -399,84 +395,7 @@
             background: var(--secondary-color);
         }
 
-<<<<<<< HEAD
         /* Responsive design */
-=======
-        .disclaimer-box {
-            background: rgba(255, 193, 7, 0.1);
-            border: 2px solid #ffc107;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .disclaimer-box p {
-            margin: 0;
-            color: #856404;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .disclaimer-section {
-            margin: 30px 0;
-        }
-
-        .disclaimer-card {
-            background: rgba(220, 53, 69, 0.05);
-            border: 2px solid #dc3545;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-
-        .disclaimer-card h3 {
-            color: #dc3545;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-
-        .disclaimer-card ul {
-            text-align: left;
-            margin: 15px 0;
-            padding-left: 20px;
-        }
-
-        .disclaimer-card ul li {
-            margin-bottom: 5px;
-            color: var(--text-primary);
-        }
-
-        .disclaimer-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 20px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .disclaimer-checkbox input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: #dc3545;
-        }
-
-        .footer-disclaimer {
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(108, 117, 125, 0.1);
-            border-radius: 10px;
-            border-left: 4px solid #6c757d;
-        }
-
-        .footer-disclaimer p {
-            margin: 0;
-            color: #6c757d;
-            text-align: center;
-            line-height: 1.4;
-        }
->>>>>>> fdbfe87de5af457ffaadd9e6fe4b498c32ffac71
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -528,7 +447,6 @@
 <body>
     <div class="container">
         <div class="header">
-<<<<<<< HEAD
             <h1><i class="fas fa-star"></i> AI Astro Therapist</h1>
             <p class="subtitle">Your Personal Vedic Astrology Guide & Spiritual Counselor</p>
             <div class="zodiac-symbols">
@@ -607,96 +525,6 @@
             </form>
         </div>
     </div>
-=======
-            <h1><i class="fas fa-star"></i> AstroWise Therapy</h1>
-            <p class="subtitle">AI-Powered Vedic Astrology for Modern Mental Wellness</p>
-            
-            <!-- Medical Disclaimer -->
-            <div class="disclaimer-box">
-                <p><i class="fas fa-info-circle"></i> <strong>Important:</strong> This service provides astrological insights for personal reflection and is not a substitute for professional medical, psychological, or psychiatric care. Please consult qualified healthcare providers for medical concerns.</p>
-                <!-- Footer Disclaimer -->
-        <div class="footer-disclaimer">
-            <p><small><i class="fas fa-exclamation-triangle"></i> <strong>Disclaimer:</strong> AstroWise Therapy is for entertainment and personal insight purposes only. Not intended as medical, psychological, or psychiatric advice. Please consult licensed healthcare professionals for mental health concerns. In crisis situations, contact emergency services immediately.</small></p>
-        </div>
-    </div>
-            
-            <div class="zodiac-symbols">
-                <span class="zodiac-symbol">♈</span>
-                <span class="zodiac-symbol">♉</span>
-                <span class="zodiac-symbol">♊</span>
-                <span class="zodiac-symbol">♋</span>
-                <span class="zodiac-symbol">♌</span>
-                <span class="zodiac-symbol">♍</span>
-                <span class="zodiac-symbol">♎</span>
-                <span class="zodiac-symbol">♏</span>
-                <span class="zodiac-symbol">♐</span>
-                <span class="zodiac-symbol">♑</span>
-                <span class="zodiac-symbol">♒</span>
-                <span class="zodiac-symbol">♓</span>
-            </div>
-        </div>
-
-        <!-- Birth Details Form -->
-        <form id="details-form" class="form-container">
-            <div class="form-group">
-                <div class="form-row">
-                    <div>
-                        <label for="dob-input">
-                            <i class="fas fa-calendar-alt"></i>Date of Birth
-                        </label>
-                        <input type="date" id="dob-input" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="tob-input">
-                            <i class="fas fa-clock"></i>Time of Birth
-                        </label>
-                        <input type="time" id="tob-input" class="input-field" required>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="city-input">
-                    <i class="fas fa-map-marker-alt"></i>Birth City
-                </label>
-                <div class="city-search-container">
-                    <input 
-                        type="text" 
-                        id="city-input" 
-                        class="input-field" 
-                        placeholder="Start typing your birth city..."
-                        autocomplete="off"
-                        required
-                    >
-                    <div id="city-results-dropdown" class="city-results-dropdown"></div>
-                </div>
-            </div>
-
-            <button type="submit" class="btn">
-                <i class="fas fa-star"></i> Generate My Astrological Profile
-            </button>
-        </form>
-
-        <!-- Chat Interface -->
-        <div id="chat-container" class="chat-container">
-            <div id="messages" class="messages-container">
-                <p><em><i class="fas fa-info-circle"></i> Please enter your birth details above to begin your personalized astrological consultation.</em></p>
-            </div>
-
-            <form id="chat-form" class="chat-input-container">
-                <textarea 
-                    id="user-input" 
-                    class="chat-input" 
-                    placeholder="Ask me about your personality, relationships, career, spiritual path, or any aspect of your life..."
-                    rows="1"
-                ></textarea>
-                <button type="submit" class="send-btn">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </form>
-        </div>
-    </div>
->>>>>>> fdbfe87de5af457ffaadd9e6fe4b498c32ffac71
 
     <script>
         const detailsForm = document.getElementById('details-form');
@@ -709,10 +537,6 @@
 
         let userBirthDetails = {};
         let isProcessing = false;
-<<<<<<< HEAD
-=======
-        let sessionId = null; // Track session for conversation continuity
->>>>>>> fdbfe87de5af457ffaadd9e6fe4b498c32ffac71
 
         // Auto-resize textarea
         userInput.addEventListener('input', function() {
@@ -765,12 +589,7 @@
             }
 
             try {
-<<<<<<< HEAD
                 const response = await fetch(`http://${window.location.hostname}:3000/search-city?q=${encodeURIComponent(query)}`);
-=======
-                // Simple relative URL - works for both local and production
-                const response = await fetch(`/search-city?q=${encodeURIComponent(query)}`);
->>>>>>> fdbfe87de5af457ffaadd9e6fe4b498c32ffac71
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -884,12 +703,6 @@
                 const response = await sendChatRequest(tempMessage, userBirthDetails);
 
                 if (response && response.response) {
-<<<<<<< HEAD
-=======
-                    // Store session ID for future requests
-                    sessionId = response.sessionId;
-                    
->>>>>>> fdbfe87de5af457ffaadd9e6fe4b498c32ffac71
                     // Success - show the chat interface
                     messagesContainer.innerHTML = `<p class="success-message"><strong>AI Astrologer:</strong> ${response.response}</p>`;
                     detailsForm.style.display = 'none';
@@ -963,39 +776,16 @@
         // Unified function to send the request to the back-end
         async function sendChatRequest(message, birthDetails) {
             try {
-<<<<<<< HEAD
                 const response = await fetch(`http://${window.location.hostname}:3000/chat`, {
-=======
-                const requestBody = {
-                    message: message,
-                    birthDetails: birthDetails
-                };
-
-                // Include session ID if we have one (for continuing conversations)
-                if (sessionId) {
-                    requestBody.sessionId = sessionId;
-                }
-
-                // Fix URL for production deployment
-                const baseURL = window.location.hostname === 'localhost' 
-                    ? `http://${window.location.hostname}:3000`
-                    : `https://${window.location.host}`;
-
-                const response = await fetch(`${baseURL}/chat`, {
->>>>>>> fdbfe87de5af457ffaadd9e6fe4b498c32ffac71
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-<<<<<<< HEAD
                     body: JSON.stringify({
                         message: message,
                         birthDetails: birthDetails
                     })
-=======
-                    body: JSON.stringify(requestBody)
->>>>>>> fdbfe87de5af457ffaadd9e6fe4b498c32ffac71
                 });
 
                 if (!response.ok) {
@@ -1003,15 +793,6 @@
                 }
 
                 const data = await response.json();
-<<<<<<< HEAD
-=======
-                
-                // Store session ID if this is the first message
-                if (data.sessionId && !sessionId) {
-                    sessionId = data.sessionId;
-                }
-                
->>>>>>> fdbfe87de5af457ffaadd9e6fe4b498c32ffac71
                 return data;
             } catch (error) {
                 console.error('Request error:', error);
@@ -1022,10 +803,6 @@
         // Initialize - check if we need to show chat form (for page refreshes)
         document.addEventListener('DOMContentLoaded', () => {
             // Reset form state on page load
-<<<<<<< HEAD
-=======
-            sessionId = null; // Reset session on page refresh
->>>>>>> fdbfe87de5af457ffaadd9e6fe4b498c32ffac71
             if (detailsForm) detailsForm.style.display = 'block';
             if (chatContainer) chatContainer.style.display = 'none';
             if (messagesContainer) messagesContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);"><em><i class="fas fa-info-circle"></i> Welcome to your personal astrological consultation. Please enter your birth details above to unlock the wisdom of your stars.</em></p>';
