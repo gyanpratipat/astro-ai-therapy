@@ -14,12 +14,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Dynamic API base URL - works for both local and production
     function getApiBaseUrl() {
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('172.');;
         if (isLocalhost) {
-            return `http://${window.location.hostname}:3000`;
+            console.log("Baseurl = http://localhost:3000 ")
+            return 'http://localhost:3000';
+            // return `http://${window.location.hostname}:3000`;
         } else {
+            // console.log("Baseurl = http://localhost:3000 ")
             return `${window.location.protocol}//${window.location.host}`;
         }
+    }
+
+    function formatAIResponse(text) {
+    // Convert **bold** to <strong> tags
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        // Convert *italic* to <em> tags
+        text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        
+        // Convert line breaks to <br> tags
+        text = text.replace(/\n/g, '<br>');
+        
+        return text;
     }
 
     // Auto-resize textarea
@@ -197,7 +213,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 sessionId = response.sessionId;
                 
                 // Success - show the chat interface
-                messagesContainer.innerHTML = `<p class="success-message"><strong>AI Astrologer:</strong> ${response.response}</p>`;
+                messagesContainer.innerHTML = `<p class="success-message"><strong>AI Astrologer:</strong> ${formatAIResponse(response.response)}</p>`;
+                // messagesContainer.innerHTML = `<p class="success-message"><strong>AI Astrologer:</strong> ${response.response}</p>`;
                 detailsForm.style.display = 'none';
                 chatContainer.style.display = 'flex';
                 
@@ -244,7 +261,8 @@ document.addEventListener('DOMContentLoaded', function() {
             hideLoading();
 
             if (response && response.response) {
-                messagesContainer.innerHTML += `<p><strong><i class="fas fa-star"></i> AI Astrologer:</strong> ${response.response}</p>`;
+                messagesContainer.innerHTML += `<p><strong><i class="fas fa-star"></i> AI Astrologer:</strong> ${formatAIResponse(response.response)}</p>`;
+                // messagesContainer.innerHTML += `<p><strong><i class="fas fa-star"></i> AI Astrologer:</strong> ${response.response}</p>`;
             } else {
                 messagesContainer.innerHTML += `<p class="error-message"><strong><i class="fas fa-exclamation-triangle"></i> Error:</strong> Could not get a response from the AI. Please try again.</p>`;
             }
